@@ -1,0 +1,36 @@
+web/vite.config.mts
+  6519a9599f9108a6 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "49245817d5f256fe2103ef65944f74eea95520a8",
+  "prompts": {
+    "3efe664fec49b79f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7701d4ec-812e-4f7c-b482-c7ca36b05b39",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 6,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    },
+    "6519a9599f9108a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1e22b8d4-9391-4f45-b45f-a152e54e7f7d",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 3,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    }
+  }
+}
