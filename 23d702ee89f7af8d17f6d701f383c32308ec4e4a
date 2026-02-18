@@ -1,0 +1,23 @@
+.github/workflows/deploy.yml
+  0e6979dc39f56025 22-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "23d702ee89f7af8d17f6d701f383c32308ec4e4a",
+  "prompts": {
+    "0e6979dc39f56025": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24d5b9db-e661-47a3-b42a-97d3224de5a9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 0,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
