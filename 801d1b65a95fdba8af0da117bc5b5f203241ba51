@@ -1,0 +1,38 @@
+web/vite.config.mts
+  241254d0dc75f4fd 5,17-51
+web/index.html
+  241254d0dc75f4fd 10,12-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "801d1b65a95fdba8af0da117bc5b5f203241ba51",
+  "prompts": {
+    "0e6979dc39f56025": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "24d5b9db-e661-47a3-b42a-97d3224de5a9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 74,
+      "total_deletions": 0,
+      "accepted_lines": 74,
+      "overriden_lines": 0
+    },
+    "241254d0dc75f4fd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7117dca8-86ce-4958-8733-ba012c9cca94",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 43,
+      "total_deletions": 2,
+      "accepted_lines": 40,
+      "overriden_lines": 0
+    }
+  }
+}
