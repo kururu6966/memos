@@ -96,5 +96,6 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.28.0+sha1.99bafbd81cd8141d21254ec30f60efd7d5028f14"
 }
