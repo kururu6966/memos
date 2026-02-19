@@ -28,7 +28,8 @@ export default defineConfig({
         icons: [
           { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
-          { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+          { src: "/android-chrome-maskable-192x192.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
+          { src: "/android-chrome-maskable-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
       workbox: {
@@ -38,8 +39,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /^\/api\//,
-            handler: "NetworkFirst",
-            options: { cacheName: "api-cache", expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 } },
+            handler: "NetworkOnly",
           },
           {
             urlPattern: /^\/file\//,
