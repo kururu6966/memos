@@ -75,11 +75,30 @@ jobs:
           key: ${{ secrets.OCI_SSH_KEY }}
           envs: IMAGE,NEW_TAG
           script: |
+            DATA_DIR="/var/opt/memos"
+            DB_FILE="memos_prod.db"
+
             # Record current image for rollback
             OLD_IMAGE=$(docker inspect --format='{{.Config.Image}}' memos 2>/dev/null || echo "")
 
             # Pull new image — fail fast without touching the running container
             docker pull "$NEW_TAG" || { echo "Pull failed, aborting deploy"; exit 1; }
+
+            # Backup SQLite database before deploy
+            command -v sqlite3 > /dev/null || { echo "sqlite3 not found"; exit 1; }
+            echo "Backing up database..."
+            mkdir -p "${DATA_DIR}/backups"
+            chmod 750 "${DATA_DIR}/backups"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            BACKUP_FILE="${DATA_DIR}/backups/${DB_FILE}_${TIMESTAMP}"
+            sqlite3 "${DATA_DIR}/${DB_FILE}" ".backup '${BACKUP_FILE}'" \
+              || { echo "Backup failed, aborting deploy"; exit 1; }
+            [ -s "$BACKUP_FILE" ] || { echo "Backup file is empty, aborting"; exit 1; }
+            chmod 640 "$BACKUP_FILE"
+            echo "Backup saved: ${BACKUP_FILE}"
+
+            # Rotate backups (keep last 5)
+            ls -1t "${DATA_DIR}/backups/${DB_FILE}_"* 2>/dev/null | tail -n +6 | xargs -r rm -f
 
             # Stop old container
             docker stop memos 2>/dev/null || true
@@ -90,7 +109,7 @@ jobs:
               --name memos \
               --restart unless-stopped \
               -p 5230:5230 \
-              -v /var/opt/memos:/var/opt/memos \
+              -v "${DATA_DIR}:${DATA_DIR}" \
               "$NEW_TAG"
 
             # Health check with retry — rollback if app is not healthy
@@ -111,12 +130,27 @@ jobs:
             docker logs memos 2>/dev/null
             docker stop memos 2>/dev/null || true
             docker rm memos 2>/dev/null || true
+
+            # Restore database from backup only if DB is corrupted (e.g. failed migration)
+            if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
+              DB_STATUS=$(sqlite3 "${DATA_DIR}/${DB_FILE}" "PRAGMA integrity_check;" 2>&1 || true)
+              if [ "$DB_STATUS" != "ok" ]; then
+                echo "Database integrity check failed: ${DB_STATUS}"
+                echo "Restoring database from backup: ${BACKUP_FILE}"
+                cp "$BACKUP_FILE" "${DATA_DIR}/${DB_FILE}"
+                rm -f "${DATA_DIR}/${DB_FILE}-wal" "${DATA_DIR}/${DB_FILE}-shm"
+                echo "Database restored"
+              else
+                echo "Database integrity OK, skipping restore"
+              fi
+            fi
+
             if [ -n "$OLD_IMAGE" ]; then
               docker run -d \
                 --name memos \
                 --restart unless-stopped \
                 -p 5230:5230 \
-                -v /var/opt/memos:/var/opt/memos \
+                -v "${DATA_DIR}:${DATA_DIR}" \
                 "$OLD_IMAGE"
               echo "Waiting for rollback health check..."
               for j in $(seq 1 5); do
