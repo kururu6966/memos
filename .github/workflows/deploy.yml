@@ -91,12 +91,12 @@ jobs:
             echo "Backing up database..."
             TIMESTAMP=$(date +%Y%m%d_%H%M%S)
             BACKUP_FILE="${DATA_DIR}/backups/${DB_FILE}_${TIMESTAMP}"
-            docker run --rm -v "${DATA_DIR}:${DATA_DIR}" "$SQLITE_IMAGE" sh -c "
-              mkdir -p -m 750 '${DATA_DIR}/backups' &&
-              sqlite3 '${DATA_DIR}/${DB_FILE}' \".backup '${BACKUP_FILE}'\" &&
-              chmod 640 '${BACKUP_FILE}' &&
-              [ -s '${BACKUP_FILE}' ]
+            mkdir -p -m 750 "${DATA_DIR}/backups"
+            docker run --rm --user "$(id -u):$(id -g)" -v "${DATA_DIR}:${DATA_DIR}" "$SQLITE_IMAGE" sh -c "
+              sqlite3 '${DATA_DIR}/${DB_FILE}' \".backup '${BACKUP_FILE}'\"
             " || { echo "Backup failed, aborting deploy"; exit 1; }
+            [ -s "$BACKUP_FILE" ] || { echo "Backup file is empty, aborting"; exit 1; }
+            chmod 640 "$BACKUP_FILE"
             echo "Backup saved: ${BACKUP_FILE}"
 
             # Rotate backups (keep last 5)
@@ -135,7 +135,7 @@ jobs:
 
             # Restore database from backup only if DB is corrupted (e.g. failed migration)
             if [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" ]; then
-              DB_STATUS=$(docker run --rm -v "${DATA_DIR}:${DATA_DIR}" "$SQLITE_IMAGE" sh -c "
+              DB_STATUS=$(docker run --rm --user "$(id -u):$(id -g)" -v "${DATA_DIR}:${DATA_DIR}" "$SQLITE_IMAGE" sh -c "
                 sqlite3 '${DATA_DIR}/${DB_FILE}' 'PRAGMA integrity_check;'
               " 2>&1 || true)
               if [ "$DB_STATUS" != "ok" ]; then
