@@ -1,0 +1,92 @@
+.github/workflows/deploy.yml
+  0156d59fc31e91a8 95
+  91244e7c47dfd867 133,135,142,146-147
+  53bf6fd34b9c7104 88,97,134,136-139,143-145
+  3b9f364b87cb61bb 87,89,92,98-100,102
+  c2c4d92fd3113ee3 78-80,90-91,93-94,96,101,112,140-141,153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "98074f67482823cf75a7516b1b0829ffcaf2d20d",
+  "prompts": {
+    "0156d59fc31e91a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "259289e3-003c-4358-8dcc-ce3ff189b2ff",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "3b9f364b87cb61bb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "20017919-73f0-4c92-a0e8-7fc4b4c3cfe8",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 1,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    },
+    "53bf6fd34b9c7104": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8dba7faf-ed59-4c98-b4df-3de1ac8ff7d1",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 6,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    },
+    "91244e7c47dfd867": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bb55596-9090-4d19-87e6-c5bbac66b71c",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 8,
+      "total_deletions": 0,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    },
+    "c2c4d92fd3113ee3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe2d75cb-96c7-41ba-8156-c2fa772fc1a6",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 9,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    },
+    "cf80cd8b02e95ff6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d7befc6d-a828-40b4-a1e3-9af69b09c607",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 2,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
