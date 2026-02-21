@@ -9,7 +9,11 @@ DATA_DIR="/var/opt/memos"
 if [ "$(id -u)" = "0" ]; then
     # Running as root, fix permissions and drop to nonroot
     if [ -d "$DATA_DIR" ]; then
-        chown -R "$MEMOS_UID:$MEMOS_GID" "$DATA_DIR" 2>/dev/null || true
+        # Only fix ownership of the data directory and memos-owned files.
+        # Skip backups/ which is managed by the deploy pipeline as a different user.
+        chown "$MEMOS_UID:$MEMOS_GID" "$DATA_DIR" 2>/dev/null || true
+        find "$DATA_DIR" -maxdepth 1 -not -name backups -not -path "$DATA_DIR" \
+          -exec chown "$MEMOS_UID:$MEMOS_GID" {} + 2>/dev/null || true
     fi
     exec su-exec "$MEMOS_UID:$MEMOS_GID" "$0" "$@"
 fi
