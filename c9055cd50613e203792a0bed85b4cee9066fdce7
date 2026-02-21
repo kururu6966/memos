@@ -1,0 +1,25 @@
+.github/workflows/deploy.yml
+  e23ae10b1ab008bc 88,90-91,94,107,112-113,138,155-156
+scripts/entrypoint.sh
+  e23ae10b1ab008bc 12-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.4",
+  "base_commit_sha": "c9055cd50613e203792a0bed85b4cee9066fdce7",
+  "prompts": {
+    "e23ae10b1ab008bc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0515f042-4aff-40e4-a9ac-f4edc5788a69",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "kururu <kururu6966@gmail.com>",
+      "messages": [],
+      "total_additions": 29,
+      "total_deletions": 25,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    }
+  }
+}
