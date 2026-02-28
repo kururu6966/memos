@@ -1,0 +1,129 @@
+name: Backup
+
+on:
+  schedule:
+    - cron: "0 18 * * *" # daily at 03:00 JST (18:00 UTC)
+  workflow_dispatch: # manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: backup
+      cancel-in-progress: false
+    environment: production
+    steps:
+      - name: Create SQLite backup on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            DATA_DIR="/var/opt/memos"
+            DB_FILE="memos_prod.db"
+
+            # Create backup using sqlite3 .backup (safe for running DB)
+            sqlite3 "${DATA_DIR}/${DB_FILE}" ".backup '/tmp/memos_backup.db'" \
+              || { echo "Backup failed"; exit 1; }
+            [ -s /tmp/memos_backup.db ] || { echo "Backup file is empty"; exit 1; }
+            echo "Backup created: $(du -h /tmp/memos_backup.db)"
+
+      - name: Download backup from server
+        env:
+          SSH_KEY: ${{ secrets.OCI_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_key
+          chmod 600 ~/.ssh/id_key
+          scp -o StrictHostKeyChecking=accept-new \
+            -i ~/.ssh/id_key \
+            "${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }}:/tmp/memos_backup.db" \
+            ./memos_backup.db
+          [ -s ./memos_backup.db ] || { echo "Downloaded backup is empty"; exit 1; }
+          ls -lh ./memos_backup.db
+
+      - name: Clean up backup on server
+        if: always()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          script: rm -f /tmp/memos_backup.db
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f ~/.ssh/id_key
+
+      - name: Install OCI CLI
+        run: |
+          set -euo pipefail
+          pip install 'oci-cli>=3.0,<4.0' --quiet
+          oci --version
+
+      - name: Configure OCI CLI
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.oci
+          printf '%s\n' "${{ secrets.OCI_API_KEY }}" > ~/.oci/key.pem
+          chmod 600 ~/.oci/key.pem
+          cat > ~/.oci/config <<EOF
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          key_file=~/.oci/key.pem
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=ap-osaka-1
+          EOF
+          sed -i 's/^[[:space:]]*//' ~/.oci/config
+          # Validate config
+          oci iam region list --output table > /dev/null \
+            || { echo "OCI CLI config is invalid. Check OCI secrets."; exit 1; }
+
+      - name: Upload to Object Storage
+        run: |
+          set -euo pipefail
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          OBJECT_NAME="db/memos_prod.db_${TIMESTAMP}"
+          oci os object put \
+            --bucket-name memos-backup \
+            --name "$OBJECT_NAME" \
+            --file ./memos_backup.db \
+            --force
+          echo "Uploaded: $OBJECT_NAME"
+
+      - name: Rotate old backups (keep last 30)
+        run: |
+          set -euo pipefail
+          OBJECTS=$(oci os object list \
+            --bucket-name memos-backup \
+            --prefix "db/memos_prod.db_" \
+            --query 'data[].name' \
+            --raw-output)
+
+          TO_DELETE=$(echo "$OBJECTS" | python3 -c "
+          import sys, json
+          names = sorted(json.load(sys.stdin), reverse=True)
+          for name in names[30:]:
+              print(name)
+          ")
+
+          if [ -z "$TO_DELETE" ]; then
+            echo "No old backups to rotate."
+            exit 0
+          fi
+
+          echo "$TO_DELETE" | while read -r obj; do
+            if oci os object delete --bucket-name memos-backup --name "$obj" --force; then
+              echo "Deleted old backup: $obj"
+            else
+              echo "Warning: failed to delete old backup: $obj"
+            fi
+          done
+
+      - name: Clean up OCI secrets
+        if: always()
+        run: rm -f ~/.oci/key.pem ~/.oci/config
